@@ -1,21 +1,37 @@
+use super::components;
+use super::prefabs;
 use super::Canvas;
+use super::KeyboardState;
 use super::Keycode;
+use prefabs::Prefab;
 
-pub struct MainScene<'a> {
-    texture_container: super::resources::TexturesContainer<'a>,
+use std::rc::Rc;
+
+pub struct MainScene {
+    tick_counter: u128,
+    texture_container: super::resources::TexturesContainer,
+    player: prefabs::Player,
     done: bool,
 }
 
-impl<'a> MainScene<'a> {
+impl MainScene {
     pub fn new(texture_container: super::resources::TexturesContainer) -> MainScene {
+        // TODO: We don't want to make a new slice for this.
+        let mut player = prefabs::Player::new(components::AnimatedSprite::new(Rc::new([
+            texture_container.player_idle_down.clone(),
+        ])));
+        player.transform.x = 400;
+        player.transform.y = 300;
         MainScene {
+            tick_counter: 0,
             texture_container,
+            player,
             done: false,
         }
     }
 }
 
-impl<'a> super::Scene for MainScene<'a> {
+impl super::Scene for MainScene {
     fn finish(&mut self) {
         self.done = true;
     }
@@ -24,8 +40,11 @@ impl<'a> super::Scene for MainScene<'a> {
         self.done
     }
 
-    fn on_keydown(&mut self, _key: Keycode) {
-        // self.finish();
+    fn on_keydown(&mut self, key: Keycode) {
+        match key {
+            Keycode::W => (),
+            _ => (),
+        }
     }
 
     fn on_keyup(&mut self, key: Keycode) {
@@ -35,18 +54,16 @@ impl<'a> super::Scene for MainScene<'a> {
         }
     }
 
-    fn on_mouse_motion(&mut self, pos: (i32, i32)) {
-        println!("Mouse moved to {:?}", pos);
+    fn update(&mut self, keyboard_state: &KeyboardState) {
+        self.tick_counter += 1;
+        self.player
+            .control(self.tick_counter, keyboard_state, &self.texture_container);
     }
 
-    fn paint(&mut self, canvas: &mut Canvas) {
+    fn paint(&self, canvas: &mut Canvas) {
         canvas.set_draw_color(super::Color::RGB(0, 0, 0));
         canvas.clear();
-
-        canvas
-            .copy(&self.texture_container.player, None, None)
-            .unwrap();
-
+        self.player.paint_into(canvas);
         canvas.present();
     }
 }

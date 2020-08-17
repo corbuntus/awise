@@ -2,10 +2,13 @@ extern crate sdl2;
 
 pub mod mainscene;
 
+use super::components;
+use super::prefabs;
 use super::resources;
+use super::Canvas;
 
-type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 use sdl2::event::Event;
+use sdl2::keyboard::KeyboardState;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::EventPump;
@@ -19,6 +22,7 @@ pub trait Scene {
     fn on_mouse_button_down(&mut self, _pos: (i32, i32), _button: i32) {}
     fn on_mouse_button_up(&mut self, _pos: (i32, i32), _button: i32) {}
     fn on_mouse_motion(&mut self, _pos: (i32, i32)) {}
+    fn on_mouse_wheel(&mut self, _y: i32) {}
     fn on_quit(&mut self) {}
 
     fn handle_common_events(&mut self, event_pump: &mut EventPump) {
@@ -38,20 +42,28 @@ pub trait Scene {
                         self.on_keyup(key);
                     }
                 }
+                Event::MouseWheel { y, .. } => {
+                    self.on_mouse_wheel(y);
+                }
                 _ => (),
             }
         }
     }
 
-    fn paint(&mut self, canvas: &mut Canvas);
+    fn update(&mut self, keyboard_state: &KeyboardState);
+    fn paint(&self, canvas: &mut Canvas);
 
     fn run(&mut self, canvas: &mut Canvas, event_pump: &mut EventPump) {
         use std::thread;
         use std::time;
+
+        let target_fps = 50;
+        let millis_per_frame = time::Duration::from_millis(1_000 / target_fps);
         'running: loop {
             let tick_begin = time::Instant::now();
 
             self.handle_common_events(event_pump);
+            self.update(&event_pump.keyboard_state());
             self.paint(canvas);
 
             if self.done() {
@@ -59,8 +71,11 @@ pub trait Scene {
             }
 
             let tick_end = time::Instant::now();
-            let tick_left = tick_end - tick_begin;
-            thread::sleep(tick_left);
+            let tick_left = millis_per_frame.checked_sub(tick_end - tick_begin);
+            if let Some(tick_left) = tick_left {
+                thread::sleep(tick_left);
+            }
         }
+        self.on_quit();
     }
 }

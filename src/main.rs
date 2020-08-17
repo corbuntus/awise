@@ -1,7 +1,11 @@
 extern crate sdl2;
 
+mod components;
+mod prefabs;
 mod resources;
 mod scenes;
+
+pub type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
 const WINDOW_WIDTH: u32 = 800;
 const WINDOW_HEIGHT: u32 = 600;
@@ -19,9 +23,9 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     let texture_creator = canvas.texture_creator();
-    let sprites = resources::load_sprites(&texture_creator);
+    let texture_container = resources::load_sprites(&texture_creator);
 
-    let mut mainscene = scenes::mainscene::MainScene::new(sprites);
+    let mut mainscene = scenes::mainscene::MainScene::new(texture_container);
 
     use scenes::Scene;
     mainscene.run(&mut canvas, &mut event_pump);
