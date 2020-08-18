@@ -10,7 +10,7 @@ impl Transform {
         Transform {
             x: 0,
             y: 0,
-            scale: 3.0,
+            scale: 1.0,
         }
     }
 }

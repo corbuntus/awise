@@ -10,6 +10,7 @@ use super::Canvas;
 use sdl2::event::Event;
 use sdl2::keyboard::KeyboardState;
 use sdl2::keyboard::Keycode;
+use sdl2::mouse::MouseState;
 use sdl2::pixels::Color;
 use sdl2::EventPump;
 
@@ -17,6 +18,10 @@ pub trait Scene {
     fn done(&self) -> bool;
     fn finish(&mut self);
 
+    // FIXME: I don't know which path to take, the event based or the state based
+    // one. For the gameplay part, the state is usually what you want, but for UI
+    // related stuff the event based is much more natural. For now I'm keeping
+    // both.
     fn on_keydown(&mut self, _key: Keycode) {}
     fn on_keyup(&mut self, _key: Keycode) {}
 
@@ -63,7 +68,7 @@ pub trait Scene {
         }
     }
 
-    fn update(&mut self, keyboard_state: &KeyboardState);
+    fn update(&mut self, mouse_state: &MouseState, keyboard_state: &KeyboardState);
     fn paint(&self, canvas: &mut Canvas);
 
     fn run(&mut self, canvas: &mut Canvas, event_pump: &mut EventPump) {
@@ -76,7 +81,7 @@ pub trait Scene {
             let tick_begin = time::Instant::now();
 
             self.handle_common_events(event_pump);
-            self.update(&event_pump.keyboard_state());
+            self.update(&event_pump.mouse_state(), &event_pump.keyboard_state());
             self.paint(canvas);
 
             if self.done() {

@@ -2,7 +2,7 @@ use super::components;
 use super::prefabs;
 use super::Canvas;
 use super::KeyboardState;
-use super::Keycode;
+use super::MouseState;
 use prefabs::Prefab;
 
 use std::rc::Rc;
@@ -41,23 +41,16 @@ impl super::Scene for MainScene {
         self.done
     }
 
-    fn on_mouse_button_down(&mut self, pos: (i32, i32), _button: i32) {
-        self.player.transform.x = pos.0;
-        self.player.transform.y = pos.1;
-    }
-
-    fn on_keyup(&mut self, key: Keycode) {
-        match key {
-            Keycode::Escape => self.finish(),
-            _ => (),
-        }
-    }
-
     // TODO: Implement a keymap instead of a KeyboardState.
-    fn update(&mut self, keyboard_state: &KeyboardState) {
+    fn update(&mut self, mouse_state: &MouseState, keyboard_state: &KeyboardState) {
         self.tick_counter += 1;
         self.player
             .control(self.tick_counter, keyboard_state, &self.texture_container);
+
+        if mouse_state.left() {
+            self.player.transform.x = mouse_state.x();
+            self.player.transform.y = mouse_state.y();
+        }
     }
 
     fn paint(&self, canvas: &mut Canvas) {

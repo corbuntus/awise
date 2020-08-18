@@ -7,8 +7,13 @@ mod scenes;
 
 pub type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
-const WINDOW_WIDTH: u32 = 920;
+const WINDOW_WIDTH: u32 = 950;
 const WINDOW_HEIGHT: u32 = 600;
+
+// TODO: The next step would be either to make basic UI components and prefabs,
+// do something with the tileset, or start with regions. Regions are parts of
+// the surface of the screen that toggle certain actions (e.g. change the scene,
+// hurt the player, interact with some{one,thing}, etc).
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();

@@ -19,8 +19,6 @@ impl Player {
         const TICKS_EACH_SPRITE: u128 = 7; // Only powers of two minus one
         const SCALE_DIFF_FACTOR: f32 = 1.01;
 
-        let mut instant_sprite_change = false;
-
         let goup = keyboard_state.is_scancode_pressed(Scancode::L);
         let godown = keyboard_state.is_scancode_pressed(Scancode::K);
         let goleft = keyboard_state.is_scancode_pressed(Scancode::J);
@@ -28,31 +26,30 @@ impl Player {
 
         let horizontal_movement = goleft ^ goright;
         let vertical_movement = goup ^ godown;
+        let old_state = self.state;
+
+        // TODO: When you're moving both horizontally and vertically the player goes
+        // faster, because both motions are combined and gives a weird effect.
+        // We have to normalize the speeds.
 
         if horizontal_movement {
-            let state = if goleft {
+            let direction = if goleft { -1 } else { 1 };
+            self.transform.x += direction * PLAYER_SPEED;
+            self.state = if goleft {
                 prefabs::PlayerState::MovingLeft
             } else {
                 prefabs::PlayerState::MovingRight
             };
-            let direction = if goleft { -1 } else { 1 };
-            self.transform.x += direction * PLAYER_SPEED;
-            // TODO: This doesn't give an amazing result when combined with
-            // vertical movement or changing opposite directions.
-            instant_sprite_change = self.state.is_idle();
-            self.state = state;
         }
 
         if vertical_movement {
-            let state = if goup {
+            let direction = if goup { -1 } else { 1 };
+            self.transform.y += direction * PLAYER_SPEED;
+            self.state = if goup {
                 prefabs::PlayerState::MovingUp
             } else {
                 prefabs::PlayerState::MovingDown
             };
-            let direction = if goup { -1 } else { 1 };
-            self.transform.y += direction * PLAYER_SPEED;
-            instant_sprite_change = self.state.is_idle();
-            self.state = state;
         }
 
         if !horizontal_movement && !vertical_movement {
@@ -64,6 +61,8 @@ impl Player {
                 _ => self.state,
             }
         }
+
+        let instant_sprite_change = self.state != old_state;
 
         if instant_sprite_change || tick_counter & TICKS_EACH_SPRITE == 0 {
             macro_rules! update_moving_sprite {

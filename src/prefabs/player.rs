@@ -14,15 +14,6 @@ pub enum PlayerState {
     MovingRight,
 }
 
-impl PlayerState {
-    pub fn is_idle(self) -> bool {
-        self == Self::IdleLeft
-            || self == Self::IdleRight
-            || self == Self::IdleDown
-            || self == Self::IdleUp
-    }
-}
-
 pub struct Player {
     pub state: PlayerState,
     pub transform: components::Transform,
@@ -41,9 +32,11 @@ impl Prefab for Player {
 
 impl Player {
     pub fn new(sprite: components::AnimatedSprite) -> Self {
+        let mut transform = components::Transform::new();
+        transform.scale = 2.0;
         Player {
             state: PlayerState::IdleDown,
-            transform: components::Transform::new(),
+            transform,
             sprite,
         }
     }
