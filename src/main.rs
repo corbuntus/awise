@@ -7,7 +7,7 @@ mod scenes;
 
 pub type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
-const WINDOW_WIDTH: u32 = 800;
+const WINDOW_WIDTH: u32 = 920;
 const WINDOW_HEIGHT: u32 = 600;
 
 fn main() {

@@ -7,6 +7,7 @@ use sdl2::keyboard::KeyboardState;
 use sdl2::keyboard::Scancode;
 use std::rc::Rc;
 
+// TODO: We could make this a trait with default implementations.
 impl Player {
     pub fn control(
         &mut self,
@@ -16,7 +17,7 @@ impl Player {
     ) {
         const PLAYER_SPEED: i32 = 3;
         const TICKS_EACH_SPRITE: u128 = 7; // Only powers of two minus one
-        const SCALE_DIFF_FACTOR: f32 = 1.001;
+        const SCALE_DIFF_FACTOR: f32 = 1.01;
 
         let mut instant_sprite_change = false;
 
@@ -104,8 +105,9 @@ impl Player {
             }
         }
 
-        if keyboard_state.is_scancode_pressed(Scancode::LShift)
-            && keyboard_state.is_scancode_pressed(Scancode::Equals)
+        if keyboard_state.is_scancode_pressed(Scancode::Equals)
+            && (keyboard_state.is_scancode_pressed(Scancode::LShift)
+                || keyboard_state.is_scancode_pressed(Scancode::RShift))
         {
             self.transform.scale *= SCALE_DIFF_FACTOR;
         }

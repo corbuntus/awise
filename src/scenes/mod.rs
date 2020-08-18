@@ -19,8 +19,11 @@ pub trait Scene {
 
     fn on_keydown(&mut self, _key: Keycode) {}
     fn on_keyup(&mut self, _key: Keycode) {}
+
+    // TODO: Use sdl2::mouse::MouseButton instead of i32.
     fn on_mouse_button_down(&mut self, _pos: (i32, i32), _button: i32) {}
     fn on_mouse_button_up(&mut self, _pos: (i32, i32), _button: i32) {}
+
     fn on_mouse_motion(&mut self, _pos: (i32, i32)) {}
     fn on_mouse_wheel(&mut self, _y: i32) {}
     fn on_quit(&mut self) {}
@@ -41,6 +44,16 @@ pub trait Scene {
                     if let Some(key) = keycode {
                         self.on_keyup(key);
                     }
+                }
+                Event::MouseButtonDown {
+                    x, y, mouse_btn, ..
+                } => {
+                    self.on_mouse_button_down((x, y), mouse_btn as i32);
+                }
+                Event::MouseButtonUp {
+                    x, y, mouse_btn, ..
+                } => {
+                    self.on_mouse_button_up((x, y), mouse_btn as i32);
                 }
                 Event::MouseWheel { y, .. } => {
                     self.on_mouse_wheel(y);

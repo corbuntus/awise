@@ -15,6 +15,8 @@ pub struct TexturesContainer {
     pub player_moving_side: Rc<[Rc<Sprite>]>,
     pub player_moving_up: Rc<[Rc<Sprite>]>,
     pub player_moving_down: Rc<[Rc<Sprite>]>,
+
+    pub swamp_texture: Rc<Sprite>,
 }
 
 pub fn load_sprites(texture_creator: &TextureCreator) -> TexturesContainer {
@@ -43,6 +45,8 @@ pub fn load_sprites(texture_creator: &TextureCreator) -> TexturesContainer {
         load_sprite("res/player/moving-up_3.bmp", texture_creator),
     ]);
 
+    let swamp_texture = load_sprite("res/swamp.bmp", texture_creator);
+
     TexturesContainer {
         player_idle_down,
         player_idle_side,
@@ -50,6 +54,7 @@ pub fn load_sprites(texture_creator: &TextureCreator) -> TexturesContainer {
         player_moving_down,
         player_moving_side,
         player_moving_up,
+        swamp_texture,
     }
 }
 
