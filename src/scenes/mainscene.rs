@@ -11,7 +11,8 @@ pub struct MainScene {
     tick_counter: u128,
     texture_container: super::resources::TexturesContainer,
     tileset: prefabs::Tileset,
-    player: prefabs::Player,
+    on_scene_change_range: prefabs::Region<prefabs::Player>,
+    player: Rc<prefabs::Player>,
     done: bool,
 }
 
@@ -19,13 +20,17 @@ impl MainScene {
     pub fn new(texture_container: super::resources::TexturesContainer) -> MainScene {
         let tileset = prefabs::Tileset::new(texture_container.swamp_texture.clone());
         // TODO: We don't want to make a new slice for this.
-        let player = prefabs::Player::new(components::AnimatedSprite::new(Rc::new([
-            texture_container.player_idle_down.clone(),
-        ])));
+        let player = Rc::new(prefabs::Player::new(components::AnimatedSprite::new(
+            Rc::new([texture_container.player_idle_down.clone()]),
+        )));
+
+        let on_scene_change_range = prefabs::Region::new(400, 400, 200, 200, player.clone());
+
         MainScene {
             tick_counter: 0,
             texture_container,
             tileset,
+            on_scene_change_range,
             player,
             done: false,
         }
@@ -44,12 +49,21 @@ impl super::Scene for MainScene {
     // TODO: Implement a keymap instead of a KeyboardState.
     fn update(&mut self, mouse_state: &MouseState, keyboard_state: &KeyboardState) {
         self.tick_counter += 1;
-        self.player
-            .control(self.tick_counter, keyboard_state, &self.texture_container);
+
+        // FIXME: This crashes because Rust does not allow a mutable reference and a
+        // immutable reference at the same time.
+        Rc::get_mut(&mut self.player).unwrap().control(
+            self.tick_counter,
+            keyboard_state,
+            &self.texture_container,
+        );
+
+        self.on_scene_change_range.update();
 
         if mouse_state.left() {
-            self.player.transform.x = mouse_state.x();
-            self.player.transform.y = mouse_state.y();
+            let mut tf = &mut Rc::get_mut(&mut self.player).unwrap().transform;
+            tf.x = mouse_state.x();
+            tf.y = mouse_state.y();
         }
     }
 

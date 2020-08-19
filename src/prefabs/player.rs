@@ -21,6 +21,10 @@ pub struct Player {
 }
 
 impl Prefab for Player {
+    fn transform(&self) -> Option<&components::Transform> {
+        Some(&self.transform)
+    }
+
     fn paint_into(&self, canvas: &mut Canvas) {
         let horizontal_mirror =
             self.state == PlayerState::MovingLeft || self.state == PlayerState::IdleLeft;
