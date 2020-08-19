@@ -1,21 +1,21 @@
+use super::Canvas;
 use super::Prefab;
-use std::rc::Rc;
+use crate::sdl2::{pixels::Color, rect::Rect};
 
-pub struct Region<T: Prefab> {
+pub struct Region {
     x: i32,
     y: i32,
     w: i32,
     h: i32,
-    target: Rc<T>,
 }
 
-impl<T: Prefab> Region<T> {
+impl Region {
     // TODO: We'll have to handle resizing
-    pub fn new(x: i32, y: i32, w: i32, h: i32, target: Rc<T>) -> Self {
-        Region { x, y, w, h, target }
+    pub fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
+        Region { x, y, w, h }
     }
 
-    pub fn check_target(&self, target: &T) -> bool {
+    pub fn check_target(&self, target: &impl Prefab) -> bool {
         match target.transform() {
             Some(tf) => {
                 self.x <= tf.x
@@ -28,9 +28,11 @@ impl<T: Prefab> Region<T> {
     }
 }
 
-impl<T: Prefab> Prefab for Region<T> {
-    fn update(&mut self) {
-        let target_collides = self.check_target(&self.target);
-        println!("player collides: {}", target_collides);
+impl Prefab for Region {
+    fn paint_into(&self, canvas: &mut Canvas) {
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        canvas
+            .draw_rect(Rect::new(self.x, self.y, self.w as u32, self.h as u32))
+            .unwrap();
     }
 }

@@ -11,8 +11,8 @@ pub struct MainScene {
     tick_counter: u128,
     texture_container: super::resources::TexturesContainer,
     tileset: prefabs::Tileset,
-    on_scene_change_range: prefabs::Region<prefabs::Player>,
-    player: Rc<prefabs::Player>,
+    on_scene_change_range: prefabs::Region,
+    player: prefabs::Player,
     done: bool,
 }
 
@@ -20,11 +20,11 @@ impl MainScene {
     pub fn new(texture_container: super::resources::TexturesContainer) -> MainScene {
         let tileset = prefabs::Tileset::new(texture_container.swamp_texture.clone());
         // TODO: We don't want to make a new slice for this.
-        let player = Rc::new(prefabs::Player::new(components::AnimatedSprite::new(
-            Rc::new([texture_container.player_idle_down.clone()]),
-        )));
+        let player = prefabs::Player::new(components::AnimatedSprite::new(Rc::new([
+            texture_container.player_idle_down.clone(),
+        ])));
 
-        let on_scene_change_range = prefabs::Region::new(400, 400, 200, 200, player.clone());
+        let on_scene_change_range = prefabs::Region::new(550, 600, 200, 200);
 
         MainScene {
             tick_counter: 0,
@@ -50,20 +50,17 @@ impl super::Scene for MainScene {
     fn update(&mut self, mouse_state: &MouseState, keyboard_state: &KeyboardState) {
         self.tick_counter += 1;
 
-        // FIXME: This crashes because Rust does not allow a mutable reference and a
-        // immutable reference at the same time.
-        Rc::get_mut(&mut self.player).unwrap().control(
-            self.tick_counter,
-            keyboard_state,
-            &self.texture_container,
-        );
+        self.player
+            .control(self.tick_counter, keyboard_state, &self.texture_container);
 
-        self.on_scene_change_range.update();
+        let player_collides = self.on_scene_change_range.check_target(&self.player);
+        if player_collides {
+            println!("player collides");
+        }
 
         if mouse_state.left() {
-            let mut tf = &mut Rc::get_mut(&mut self.player).unwrap().transform;
-            tf.x = mouse_state.x();
-            tf.y = mouse_state.y();
+            self.player.transform.x = mouse_state.x();
+            self.player.transform.y = mouse_state.y();
         }
     }
 
@@ -71,6 +68,7 @@ impl super::Scene for MainScene {
         canvas.set_draw_color(super::Color::RGB(0, 0, 0));
         canvas.clear();
         self.tileset.paint_into(canvas);
+        self.on_scene_change_range.paint_into(canvas);
         self.player.paint_into(canvas);
         canvas.present();
     }
