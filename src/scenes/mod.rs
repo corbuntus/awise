@@ -17,6 +17,8 @@ use sdl2::EventPump;
 pub trait Scene {
     fn done(&self) -> bool;
     fn finish(&mut self);
+    fn next_scene<'a>(&'a mut self) -> Option<&'a mut dyn Scene>;
+    fn set_next_scene(&mut self, scene: Box<dyn Scene>);
 
     // FIXME: I don't know which path to take, the event based or the state based
     // one. For the gameplay part, the state is usually what you want, but for UI
@@ -95,5 +97,9 @@ pub trait Scene {
             }
         }
         self.on_quit();
+
+        if let Some(next_scene) = self.next_scene() {
+            next_scene.run(canvas, event_pump);
+        }
     }
 }

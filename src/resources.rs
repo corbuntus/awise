@@ -7,6 +7,7 @@ use sdl2::render::Texture;
 
 type TextureCreator = sdl2::render::TextureCreator<sdl2::video::WindowContext>;
 
+#[derive(Clone)]
 pub struct TexturesContainer {
     pub player_idle_down: Rc<Sprite>,
     pub player_idle_side: Rc<Sprite>,

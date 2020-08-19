@@ -18,6 +18,7 @@ pub struct Player {
     pub state: PlayerState,
     pub transform: components::Transform,
     pub sprite: components::AnimatedSprite,
+    pub hidden: bool,
 }
 
 impl Prefab for Player {
@@ -26,6 +27,9 @@ impl Prefab for Player {
     }
 
     fn paint_into(&self, canvas: &mut Canvas) {
+        if self.hidden {
+            return;
+        }
         let horizontal_mirror =
             self.state == PlayerState::MovingLeft || self.state == PlayerState::IdleLeft;
         self.sprite
@@ -42,6 +46,7 @@ impl Player {
             state: PlayerState::IdleDown,
             transform,
             sprite,
+            hidden: false,
         }
     }
 }
